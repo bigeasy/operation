@@ -3,7 +3,7 @@ function Operation (operation) {
         this.operation = operation
         this.method = 'apply'
         this.object = null
-    } else if (typeof operation.object == 'object') {
+    } else {
         this.object = operation.object
         if (typeof operation.method == 'string') {
             this.operation = this
