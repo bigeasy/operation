@@ -1,0 +1,17 @@
+Operation
+
+Wrapper a user specified callback with optional context.
+
+    Discussion:     http://bigeasy.github.io/adhere/issues/1
+
+    Documentation:  http://bigeasy.github.io/adhere
+    Source:         http://github.io/bigeasy/adhere
+    Issues:         http://github.com/bigeasy/adhere/issues
+
+    Install:        `npm install adhere`
+
+    License:        MIT
+
+To learn everything you want to know about Operation start here:
+
+    http://bigeasy.github.io/adhere
