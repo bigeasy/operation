@@ -17,11 +17,11 @@ function Operation (operation) {
 }
 
 Operation.prototype.apply = function (vargs) {
-    this.operation[this.method](this.object, vargs)
+    return this.operation[this.method](this.object, vargs)
 }
 
 Operation.prototype._named = function (object, vargs) {
-    object[this._name].apply(object, vargs)
+    return object[this._name].apply(object, vargs)
 }
 
 module.exports = Operation
