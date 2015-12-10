@@ -19,6 +19,6 @@ function prove (assert) {
     }
     operation = new Operation({ object: object, method: 'named' })
     operation.apply([ 1 ])
-    operation = new Operation({ object: object, method: object.direct })
-    operation.apply([ 1 ])
+    operation = new Operation({ object: object, method: object.direct, vargs: [ 1 ] })
+    operation.apply([])
 }
