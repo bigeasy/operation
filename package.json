@@ -1,6 +1,6 @@
 {
     "name":             "operation",
-    "version":          "0.0.4",
+    "version":          "1.0.0",
     "author":           "Alan Gutierrez <alan@prettyrobots.com>",
     "description":      "Wrapper a user specified callback with optional context.",
     "keywords":
