@@ -32,8 +32,8 @@ Operation.prototype.apply = function (args, vargs) {
     return this.operation[this.method](this.object, this._vargs(args, vargs))
 }
 
-Operation.prototype._named = function (object, args, vargs) {
-    return object[this._name].apply(object, this._vargs(args, vargs))
+Operation.prototype._named = function (object, vargs) {
+    return object[this._name].apply(object, vargs)
 }
 
 module.exports = Operation
