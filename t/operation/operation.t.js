@@ -1,4 +1,4 @@
-require('proof')(5, prove)
+require('proof')(6, prove)
 
 function prove (assert) {
     var Operation = require('../..'), operation
@@ -15,10 +15,16 @@ function prove (assert) {
         named: function (one) {
             assert(this === object, 'named object method this')
             assert(one, 1, 'named object method parameters')
-        }
+        },
     }
     operation = new Operation({ object: object, method: 'named' })
     operation.apply([ 1 ])
     operation = new Operation({ object: object, method: object.direct, vargs: [ 1 ] })
     operation.apply([])
+
+    operation = new Operation(function (one, two, three) {
+        assert([ one, two, three ], [ 1, 2, 3 ], 'argument munging')
+    }, [ 2 ])
+
+    operation.apply([ 1 ], [ 3 ])
 }

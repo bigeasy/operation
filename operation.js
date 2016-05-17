@@ -1,12 +1,15 @@
-function Operation (operation) {
+var slice = [].slice
+
+function Operation (operation, vargs) {
+    vargs || (vargs = [])
     if (typeof operation == 'function') {
         this.operation = operation
         this.method = 'apply'
         this.object = null
-        this.vargs = []
+        this.vargs = vargs
     } else {
         this.object = operation.object
-        this.vargs = operation.vargs || []
+        this.vargs = (operation.vargs || []).concat(vargs)
         if (typeof operation.method == 'string') {
             this.operation = this
             this.method = '_named'
@@ -18,12 +21,19 @@ function Operation (operation) {
     }
 }
 
-Operation.prototype.apply = function (vargs) {
-    return this.operation[this.method](this.object, this.vargs.concat(vargs))
+Operation.prototype._vargs = function (args, vargs) {
+    if (vargs == null) {
+        return this.vargs.concat(args)
+    }
+    return args.concat(this.vargs.concat(vargs))
 }
 
-Operation.prototype._named = function (object, vargs) {
-    return object[this._name].apply(object, this.vargs.concat(vargs))
+Operation.prototype.apply = function (args, vargs) {
+    return this.operation[this.method](this.object, this._vargs(args, vargs))
+}
+
+Operation.prototype._named = function (object, args, vargs) {
+    return object[this._name].apply(object, this._vargs(args, vargs))
 }
 
 module.exports = Operation
