@@ -2,10 +2,13 @@
     "name":             "operation",
     "version":          "1.2.0",
     "author":           "Alan Gutierrez <alan@prettyrobots.com>",
-    "description":      "Wrapper a user specified callback with optional context.",
+    "description":
+
+        "Container for user-specified callbacks that allows for operation user-specific context object.",
+
     "keywords":
     [
-                        "http", "https", "rest", "json", "curl"
+                        "function", "object", "callback"
     ],
     "contributors":     [],
     "homepage":         "https://github.com/bigeasy/operation",
