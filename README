@@ -1,0 +1,19 @@
+Operation
+
+Container for user-specified callbacks that allows for operation user-specific context object.
+
+    Discussion:     https://github.com/bigeasy/operation/issues/1
+
+    Documentation:  https://bigeasy.github.io/operation
+    Source:         https://github.com/bigeasy/operation
+    Issues:         https://github.com/bigeasy/operation/issues
+    CI:             https://travis-ci.org/bigeasy/operation
+    Coverage:       https://coveralls.io/github/bigeasy/operation
+
+    Install:        `npm install operation`
+
+    License:        MIT
+
+To learn everything you want to know about Empathy start here:
+
+    http://bigeasy.github.io/operation
