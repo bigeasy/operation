@@ -1,14 +1,19 @@
 var slice = [].slice
 
 function Operation (operation, vargs) {
+    var object = null
+    if (vargs && !Array.isArray(vargs)) {
+        object = vargs.object || null
+        vargs = vargs.vargs
+    }
     vargs || (vargs = [])
     if (typeof operation == 'function') {
         this.operation = operation
         this.method = 'apply'
-        this.object = null
+        this.object = object || null
         this.vargs = vargs
     } else {
-        this.object = operation.object
+        this.object = operation.object || object
         this.vargs = (operation.vargs || []).concat(vargs)
         if (typeof operation.method == 'string') {
             this.operation = this
