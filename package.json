@@ -1,7 +1,6 @@
 {
     "name":                 "operation",
     "version":              "1.2.0",
-    "author":               "Alan Gutierrez <alan@prettyrobots.com>",
     "description":
 
       "Container for user-specified callbacks that allows for operation user-specific context object.",
@@ -10,9 +9,9 @@
     [
                             "function", "object", "callback"
     ],
+    "author":               "Alan Gutierrez <alan@prettyrobots.com>",
     "homepage":             "https://github.com/bigeasy/operation",
     "bugs":                 "https://github.com/bigeasy/operation/issues",
-    "main":                 "operation",
     "license":              "MIT",
     "repository":
     {
@@ -26,8 +25,9 @@
     {
                             "proof":                        "1.x"
     },
+    "main":                 "operation",
     "scripts":
     {
-                            "test": "proof platform win32 && proof test */*/*.t.js || t/test"
+                            "test": "proof platform win32 && proof test */*.t.js || t/test"
     }
 }
