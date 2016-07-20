@@ -1,7 +1,7 @@
 require('proof')(7, prove)
 
 function prove (assert) {
-    var Operation = require('../..'), operation
+    var Operation = require('..'), operation
     operation = new Operation(function f (one) {
         assert(one, 1, 'as function')
     })
