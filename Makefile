@@ -66,8 +66,7 @@ node_modules/.bin/edify:
 	npm install less edify edify.markdown edify.highlight edify.include
 
 watch: all
-	fswatch --exclude '.' --include '\.html$$' --include '\.less$$' --include
-	'\.md$$' --include '\.js$$' pages css source *.md | while read line; \
+	fswatch --exclude '.' --include '\.html$$' --include '\.less$$' --include '\.md$$' --include '\.js$$' pages css source *.md | while read line; \
 	do \
 		make --no-print-directory all; \
 		osascript -e "$$CHROME_REFRESH"; \
