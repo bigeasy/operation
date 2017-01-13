@@ -55,7 +55,7 @@ node_modules/.bin/docco:
 
 node_modules/.bin/serve:
 	mkdir -p node_modules
-	npm install serve
+	npm install serve@1.4.0
 
 node_modules/.bin/lessc:
 	mkdir -p node_modules
@@ -63,10 +63,10 @@ node_modules/.bin/lessc:
 
 node_modules/.bin/edify:
 	mkdir -p node_modules
-	npm install less edify edify.markdown edify.highlight edify.include
+	npm install less edify edify.pug edify.markdown edify.highlight edify.include
 
 watch: all
-	fswatch --exclude '.' --include '\.html$$' --include '\.less$$' --include '\.md$$' --include '\.js$$' pages css source *.md | while read line; \
+	fswatch --exclude '.' --include '\.pug$$' --include '\.less$$' --include '\.md$$' --include '\.js$$' pages css source *.md | while read line; \
 	do \
 		make --no-print-directory all; \
 		osascript -e "$$CHROME_REFRESH"; \
@@ -82,9 +82,10 @@ docco/%.html: source/%.js node_modules/.bin/docco
 
 index.html: index.md
 
-%.html: pages/%.html node_modules/.bin/edify
+%.html: pages/%.pug node_modules/.bin/edify
 	@echo generating $@
-	@(node node_modules/.bin/edify include --select '.include' --type text | \
+	@(node node_modules/.bin/edify pug | \
+		node_modules/.bin/edify include --select '.include' --type text | \
 	    node node_modules/.bin/edify markdown --select '.markdown' | \
 	    node node_modules/.bin/edify highlight --select '.lang-javascript' --language 'javascript') < $< > $@
 
