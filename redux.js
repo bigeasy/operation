@@ -1,18 +1,26 @@
 module.exports = function () {
     var vargs = Array.prototype.slice.call(arguments)
-    var operation = vargs.shift(), arity = null, properties = {}
+    var operation = vargs.shift(), arity = null, options = {}
     if (typeof vargs[0] == 'number') {
         arity = vargs.shift()
     }
     if (vargs.length) {
-        properties = vargs.shift()
+        options = vargs.shift()
     }
     var object = null, method = null
-    if (typeof operation == 'function') {
+    switch (typeof operation) {
+    case 'function':
         operation = {
-            object: null,
+            object: options.object || null,
             method: operation
         }
+        break
+    case 'string':
+        operation = {
+            object: options.object,
+            method: operation
+        }
+        break
     }
     var f
     if (arity) {
@@ -50,8 +58,8 @@ module.exports = function () {
             })(operation.object, operation.method)
         }
     }
-    for (var name in properties) {
-        f[name] = properties[name]
+    for (var name in options.properties || {}) {
+        f[name] = options.properties[name]
     }
     return f
 }
