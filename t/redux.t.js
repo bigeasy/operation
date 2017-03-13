@@ -1,4 +1,4 @@
-require('proof')(13, prove)
+require('proof')(16, prove)
 
 function prove (assert) {
     var operation = require('../redux')
@@ -34,4 +34,13 @@ function prove (assert) {
     f = operation('method', { arity: 3, object: object })
     assert(f.length, 3, 'fixed arity default object')
     assert(f(1, 2, 3), 6, 'default object')
+    f = operation({ object: object, method: 'missing' })
+    assert(f.length, 0, 'arity missing method')
+    object.missing = object.method
+    assert(f(1, 2, 3), 6, 'missing method assigned')
+    try {
+        operation({ method: object.method }, 4)
+    } catch (error) {
+        assert(error.message, 'arity set through options array', 'arity as argument')
+    }
 }
