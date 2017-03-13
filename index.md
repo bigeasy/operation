@@ -1,5 +1,1 @@
-Why isn't this working?
-
-Hello.
-
-Operation *documentation*. TK.
+Have a look at the [Docco](./docco/) for now.
