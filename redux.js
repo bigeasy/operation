@@ -1,9 +1,12 @@
+var assert = require('assert')
+
 module.exports = function () {
     var vargs = Array.prototype.slice.call(arguments)
     var operation = vargs.shift(), arity = null, options = {}
     if (typeof vargs[0] == 'number') {
         arity = vargs.shift()
     }
+    assert(arity == null, 'arity set through options array')
     if (vargs.length) {
         options = vargs.shift()
     }
@@ -24,6 +27,7 @@ module.exports = function () {
     }
     var f
     var args = []
+    arity = options.arity
     if (arity) {
         for (var i = 0; i < arity; i++) {
             args.push('_' + i)
