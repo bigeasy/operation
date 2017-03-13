@@ -23,8 +23,8 @@ module.exports = function () {
         break
     }
     var f
+    var args = []
     if (arity) {
-        var args = []
         for (var i = 0; i < arity; i++) {
             args.push('_' + i)
         }
@@ -44,18 +44,27 @@ module.exports = function () {
         }
     } else {
         if (typeof operation.method == 'string') {
+            method = operation.object[operation.method]
+            arity = method == null ? 0 : method.length
+        } else {
+            arity = operation.method.length
+        }
+        for (var i = 0; i < arity; i++) {
+            args.push('_' + i)
+        }
+        if (typeof operation.method == 'string') {
             var escaped = JSON.stringify(operation.method)
             f = Function.call(Function, 'object', '                         \n\
-                return function () {                                        \n\
+                return function (' + args.join(', ') + ') {                 \n\
                     return object[' + escaped + '].apply(object, arguments) \n\
                 }                                                           \n\
             ')(operation.object, operation.method)
         } else {
-            f = (function (object, method) {
-                return function () {
-                    return method.apply(object, arguments)
-                }
-            })(operation.object, operation.method)
+            f = Function.call(Function, 'object', 'method', '               \n\
+                return function (' + args.join(', ') + ') {                 \n\
+                    return method.apply(object, arguments)                  \n\
+                }                                                           \n\
+            ')(operation.object, operation.method)
         }
     }
     for (var name in options.properties || {}) {
