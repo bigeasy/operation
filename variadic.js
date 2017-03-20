@@ -1,14 +1,13 @@
 var assert = require('assert')
 var redux = require('./redux')
 
-module.exports = function (vargs, options) {
+function variadic (vargs, options) {
     options || (options = {})
     var operation = null
     switch (typeof vargs[0]) {
     case 'object':
         if (Array.isArray(vargs[0])) {
-            var object = vargs.shift()
-            operation = { object: object[0], method: object[1] }
+            return variadic(vargs.shift(), options)
         } else {
             switch (typeof vargs[1]) {
             case 'function':
@@ -34,3 +33,5 @@ module.exports = function (vargs, options) {
     }
     return redux(operation, options)
 }
+
+module.exports = variadic
