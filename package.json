@@ -1,6 +1,6 @@
 {
     "name":                 "operation",
-    "version":              "1.2.5",
+    "version":              "1.2.6",
     "description":
 
       "Container for user-specified callbacks that allows for operation user-specific context object.",
