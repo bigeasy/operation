@@ -14,16 +14,21 @@ module.exports = function () {
     switch (typeof operation) {
     case 'function':
         operation = {
+            type: 'function',
             object: options.object || null,
             method: operation
         }
         break
     case 'string':
         operation = {
+            type: 'method',
             object: options.object,
             method: operation
         }
         break
+    }
+    if (operation.type == 'function' && options.properties == null) {
+        return operation.method
     }
     var f
     var args = []
