@@ -32,8 +32,8 @@ function variadic (vargs, options) {
         assert(false, 'unable to determine desired operation')
     }
     var f = redux(operation, options)
-    if (options.vargs && Array.isArray(vargs[0])) {
-        f.vargs = vargs.shift()
+    if (options.vargs) {
+        f.vargs = Array.isArray(vargs[0]) ? vargs.shift() : []
     }
     return f
 }
