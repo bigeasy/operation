@@ -31,7 +31,11 @@ function variadic (vargs, options) {
     default:
         assert(false, 'unable to determine desired operation')
     }
-    return redux(operation, options)
+    var f = redux(operation, options)
+    if (options.vargs && Array.isArray(vargs[0])) {
+        f.vargs = vargs.shift()
+    }
+    return f
 }
 
 module.exports = variadic

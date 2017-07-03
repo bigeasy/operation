@@ -1,4 +1,4 @@
-require('proof')(18, prove)
+require('proof')(21, prove)
 
 function prove (assert) {
     var Operation = require('../variadic')
@@ -10,6 +10,10 @@ function prove (assert) {
     var f = Operation([ object, 'method' ], { arity: 3, properties: { vargs: [ 1, 2, 3 ] } })
     assert(f.vargs, [ 1, 2, 3 ], 'properties')
     assert(f.length, 3, 'specified arity named arity')
+    assert(f(1, 2, 3), 6, 'specified arity named')
+    var f = Operation([ object, 'method', [ 1, 2, 3 ] ], { vargs: true })
+    assert(f.vargs, [ 1, 2, 3 ], 'properties')
+    assert(f.length, 4, 'specified arity named arity')
     assert(f(1, 2, 3), 6, 'specified arity named')
     f = Operation([ object, object.method ], { arity: 3 })
     assert(f.length, 3, 'specified arity method arity')
