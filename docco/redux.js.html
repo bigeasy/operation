@@ -29,6 +29,11 @@
                   redux.js
                 </a>
 
+
+                <a class="source" href="variadic.js.html">
+                  variadic.js
+                </a>
+
             </div>
           </div>
         </li>
@@ -69,16 +74,21 @@
     <span class="hljs-keyword">switch</span> (<span class="hljs-keyword">typeof</span> operation) {
     <span class="hljs-keyword">case</span> <span class="hljs-string">'function'</span>:
         operation = {
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'function'</span>,
             <span class="hljs-attr">object</span>: options.object || <span class="hljs-literal">null</span>,
             <span class="hljs-attr">method</span>: operation
         }
         <span class="hljs-keyword">break</span>
     <span class="hljs-keyword">case</span> <span class="hljs-string">'string'</span>:
         operation = {
+            <span class="hljs-attr">type</span>: <span class="hljs-string">'method'</span>,
             <span class="hljs-attr">object</span>: options.object,
             <span class="hljs-attr">method</span>: operation
         }
         <span class="hljs-keyword">break</span>
+    }
+    <span class="hljs-keyword">if</span> (operation.type == <span class="hljs-string">'function'</span> &amp;&amp; options.properties == <span class="hljs-literal">null</span>) {
+        <span class="hljs-keyword">return</span> operation.method
     }
     <span class="hljs-keyword">var</span> f
     <span class="hljs-keyword">var</span> args = []
@@ -130,7 +140,9 @@
         f[name] = options.properties[name]
     }
     <span class="hljs-keyword">return</span> f
-}</pre></div></div>
+}
+
+</pre></div></div>
 
         </li>
 
