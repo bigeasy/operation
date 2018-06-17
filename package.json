@@ -25,6 +25,7 @@
     {
                             "proof":                        "3.0.x"
     },
+    "main":                 "operation",
     "scripts":
     {
                             "test": "proof platform win32 && proof test */*.t.js || t/test"

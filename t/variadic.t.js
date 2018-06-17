@@ -1,7 +1,7 @@
 require('proof')(22, prove)
 
 function prove (assert) {
-    var Operation = require('../variadic')
+    var Operation = require('..')
     var object = {
         method: function (one, two, three, four) {
             return one + two + three
