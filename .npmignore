@@ -1,0 +1,7 @@
+/.*
+/*.md
+/benchmark
+/coverage
+/docs
+/node_modules
+/t
