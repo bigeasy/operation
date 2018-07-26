@@ -58,52 +58,47 @@
 
             </div>
 
-            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> slice = [].slice
+            <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>)
+<span class="hljs-keyword">var</span> redux = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./redux'</span>)
 
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Operation</span> (<span class="hljs-params">operation, vargs</span>) </span>{
-    <span class="hljs-keyword">var</span> object = <span class="hljs-literal">null</span>
-    <span class="hljs-keyword">if</span> (vargs &amp;&amp; !<span class="hljs-built_in">Array</span>.isArray(vargs)) {
-        object = vargs.object || <span class="hljs-literal">null</span>
-        vargs = vargs.vargs
-    }
-    vargs || (vargs = [])
-    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> operation == <span class="hljs-string">'function'</span>) {
-        <span class="hljs-keyword">this</span>.operation = operation
-        <span class="hljs-keyword">this</span>.method = <span class="hljs-string">'apply'</span>
-        <span class="hljs-keyword">this</span>.object = object || <span class="hljs-literal">null</span>
-        <span class="hljs-keyword">this</span>.vargs = vargs
-    } <span class="hljs-keyword">else</span> {
-        <span class="hljs-keyword">this</span>.object = operation.object || object
-        <span class="hljs-keyword">this</span>.vargs = (operation.vargs || []).concat(vargs)
-        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> operation.method == <span class="hljs-string">'string'</span>) {
-            <span class="hljs-keyword">this</span>.operation = <span class="hljs-keyword">this</span>
-            <span class="hljs-keyword">this</span>.method = <span class="hljs-string">'_named'</span>
-            <span class="hljs-keyword">this</span>._name = operation.method
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">variadic</span> (<span class="hljs-params">vargs, options</span>) </span>{
+    options || (options = {})
+    <span class="hljs-keyword">var</span> operation = <span class="hljs-literal">null</span>
+    <span class="hljs-keyword">switch</span> (<span class="hljs-keyword">typeof</span> vargs[<span class="hljs-number">0</span>]) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'object'</span>:
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Array</span>.isArray(vargs[<span class="hljs-number">0</span>])) {
+            <span class="hljs-keyword">return</span> variadic(vargs.shift(), options)
         } <span class="hljs-keyword">else</span> {
-            <span class="hljs-keyword">this</span>.operation = operation.method
-            <span class="hljs-keyword">this</span>.method = <span class="hljs-string">'apply'</span>
+            <span class="hljs-keyword">switch</span> (<span class="hljs-keyword">typeof</span> vargs[<span class="hljs-number">1</span>]) {
+            <span class="hljs-keyword">case</span> <span class="hljs-string">'function'</span>:
+            <span class="hljs-keyword">case</span> <span class="hljs-string">'string'</span>:
+                operation = { <span class="hljs-attr">object</span>: vargs.shift(), <span class="hljs-attr">method</span>: vargs.shift() }
+                <span class="hljs-keyword">break</span>
+            <span class="hljs-keyword">default</span>:
+                assert(<span class="hljs-literal">false</span>, <span class="hljs-string">'expecting function or method name'</span>)
+            }
         }
+        <span class="hljs-keyword">break</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'function'</span>:
+        operation = { <span class="hljs-attr">object</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">method</span>: vargs.shift() }
+        <span class="hljs-keyword">break</span>
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'string'</span>:
+        <span class="hljs-keyword">if</span> (options.object == <span class="hljs-literal">null</span>) {
+            assert(<span class="hljs-literal">false</span>, <span class="hljs-string">'implicit object requires default object'</span>)
+        }
+        operation = { <span class="hljs-attr">object</span>: options.object, <span class="hljs-attr">method</span>: vargs.shift() }
+        <span class="hljs-keyword">break</span>
+    <span class="hljs-keyword">default</span>:
+        assert(<span class="hljs-literal">false</span>, <span class="hljs-string">'unable to determine desired operation'</span>)
     }
-}
-
-Operation.prototype._vargs = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">args, vargs</span>) </span>{
-    <span class="hljs-keyword">if</span> (vargs == <span class="hljs-literal">null</span>) {
-        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.vargs.concat(args)
+    <span class="hljs-keyword">var</span> f = redux(operation, options)
+    <span class="hljs-keyword">if</span> (options.vargs) {
+        f.vargs = <span class="hljs-built_in">Array</span>.isArray(vargs[<span class="hljs-number">0</span>]) ? vargs.shift() : []
     }
-    <span class="hljs-keyword">return</span> args.concat(<span class="hljs-keyword">this</span>.vargs.concat(vargs))
+    <span class="hljs-keyword">return</span> f
 }
 
-Operation.prototype.apply = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">args, vargs</span>) </span>{
-    <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.operation[<span class="hljs-keyword">this</span>.method](<span class="hljs-keyword">this</span>.object, <span class="hljs-keyword">this</span>._vargs(args, vargs))
-}
-
-Operation.prototype._named = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">object, vargs</span>) </span>{
-    <span class="hljs-keyword">return</span> object[<span class="hljs-keyword">this</span>._name].apply(object, vargs)
-}
-
-<span class="hljs-built_in">module</span>.exports = Operation
-
-</pre></div></div>
+<span class="hljs-built_in">module</span>.exports = variadic</pre></div></div>
 
         </li>
 
