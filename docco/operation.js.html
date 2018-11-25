@@ -59,46 +59,60 @@
             </div>
 
             <div class="content"><div class='highlight'><pre><span class="hljs-keyword">var</span> assert = <span class="hljs-built_in">require</span>(<span class="hljs-string">'assert'</span>)
-<span class="hljs-keyword">var</span> redux = <span class="hljs-built_in">require</span>(<span class="hljs-string">'./redux'</span>)
 
-<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">variadic</span> (<span class="hljs-params">vargs, options</span>) </span>{
-    options || (options = {})
-    <span class="hljs-keyword">var</span> operation = <span class="hljs-literal">null</span>
+</pre></div></div>
+
+        </li>
+
+
+        <li id="section-2">
+            <div class="annotation">
+
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>This is a doodle of a library, but I find it very useful because I use this
+logic everywhere in my code.</p>
+
+            </div>
+
+            <div class="content"><div class='highlight'><pre>exports.shift = <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">operation</span> (<span class="hljs-params">vargs</span>) </span>{
     <span class="hljs-keyword">switch</span> (<span class="hljs-keyword">typeof</span> vargs[<span class="hljs-number">0</span>]) {
+    <span class="hljs-keyword">case</span> <span class="hljs-string">'function'</span>:
+        <span class="hljs-keyword">if</span> (<span class="hljs-keyword">this</span> === exports) {
+            <span class="hljs-keyword">return</span> vargs.shift()
+        }
+        <span class="hljs-keyword">return</span> vargs.shift().bind(<span class="hljs-keyword">this</span>)
     <span class="hljs-keyword">case</span> <span class="hljs-string">'object'</span>:
         <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Array</span>.isArray(vargs[<span class="hljs-number">0</span>])) {
-            <span class="hljs-keyword">return</span> variadic(vargs.shift(), options)
+            <span class="hljs-keyword">return</span> operation(vargs.shift())
         } <span class="hljs-keyword">else</span> {
-            <span class="hljs-keyword">switch</span> (<span class="hljs-keyword">typeof</span> vargs[<span class="hljs-number">1</span>]) {
+            <span class="hljs-keyword">var</span> object = vargs.shift()
+            <span class="hljs-keyword">switch</span> (<span class="hljs-keyword">typeof</span> vargs[<span class="hljs-number">0</span>]) {
             <span class="hljs-keyword">case</span> <span class="hljs-string">'function'</span>:
+                <span class="hljs-keyword">return</span> vargs.shift().bind(object)
             <span class="hljs-keyword">case</span> <span class="hljs-string">'string'</span>:
-                operation = { <span class="hljs-attr">object</span>: vargs.shift(), <span class="hljs-attr">method</span>: vargs.shift() }
-                <span class="hljs-keyword">break</span>
+                <span class="hljs-keyword">return</span> object[vargs.shift()].bind(object)
             <span class="hljs-keyword">default</span>:
                 assert(<span class="hljs-literal">false</span>, <span class="hljs-string">'expecting function or method name'</span>)
             }
         }
-        <span class="hljs-keyword">break</span>
-    <span class="hljs-keyword">case</span> <span class="hljs-string">'function'</span>:
-        operation = { <span class="hljs-attr">object</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">method</span>: vargs.shift() }
-        <span class="hljs-keyword">break</span>
     <span class="hljs-keyword">case</span> <span class="hljs-string">'string'</span>:
-        <span class="hljs-keyword">if</span> (options.object == <span class="hljs-literal">null</span>) {
-            assert(<span class="hljs-literal">false</span>, <span class="hljs-string">'implicit object requires default object'</span>)
-        }
-        operation = { <span class="hljs-attr">object</span>: options.object, <span class="hljs-attr">method</span>: vargs.shift() }
-        <span class="hljs-keyword">break</span>
+        assert(<span class="hljs-keyword">this</span> !== exports, <span class="hljs-string">'implicit object required'</span>)
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>[vargs.shift()].bind(<span class="hljs-keyword">this</span>)
     <span class="hljs-keyword">default</span>:
         assert(<span class="hljs-literal">false</span>, <span class="hljs-string">'unable to determine desired operation'</span>)
     }
-    <span class="hljs-keyword">var</span> f = redux(operation, options)
-    <span class="hljs-keyword">if</span> (options.vargs) {
-        f.vargs = <span class="hljs-built_in">Array</span>.isArray(vargs[<span class="hljs-number">0</span>]) ? vargs.shift() : []
-    }
-    <span class="hljs-keyword">return</span> f
 }
 
-<span class="hljs-built_in">module</span>.exports = variadic</pre></div></div>
+exports.vargs = <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> vargs = []
+    vargs.push.apply(vargs, <span class="hljs-built_in">arguments</span>)
+    vargs.unshift(exports.shift.call(<span class="hljs-keyword">this</span>, vargs))
+    <span class="hljs-keyword">return</span> vargs
+}
+
+</pre></div></div>
 
         </li>
 
