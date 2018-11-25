@@ -1,7 +1,7 @@
 require('proof')(10, prove)
 
 function prove (okay) {
-    var operation = require('../sketch')
+    var operation = require('..')
 
     var f = operation.shift([ function () { return this.value } ])
     okay(f.call({ value: 1 }), 1, 'function')

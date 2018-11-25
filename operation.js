@@ -1,41 +1,39 @@
 var assert = require('assert')
-var redux = require('./redux')
 
-function variadic (vargs, options) {
-    options || (options = {})
-    var operation = null
+// This is a doodle of a library, but I find it very useful because I use this
+// logic everywhere in my code.
+exports.shift = function operation (vargs) {
     switch (typeof vargs[0]) {
+    case 'function':
+        if (this === exports) {
+            return vargs.shift()
+        }
+        return vargs.shift().bind(this)
     case 'object':
         if (Array.isArray(vargs[0])) {
-            return variadic(vargs.shift(), options)
+            return operation(vargs.shift())
         } else {
-            switch (typeof vargs[1]) {
+            var object = vargs.shift()
+            switch (typeof vargs[0]) {
             case 'function':
+                return vargs.shift().bind(object)
             case 'string':
-                operation = { object: vargs.shift(), method: vargs.shift() }
-                break
+                return object[vargs.shift()].bind(object)
             default:
                 assert(false, 'expecting function or method name')
             }
         }
-        break
-    case 'function':
-        operation = { object: null, method: vargs.shift() }
-        break
     case 'string':
-        if (options.object == null) {
-            assert(false, 'implicit object requires default object')
-        }
-        operation = { object: options.object, method: vargs.shift() }
-        break
+        assert(this !== exports, 'implicit object required')
+        return this[vargs.shift()].bind(this)
     default:
         assert(false, 'unable to determine desired operation')
     }
-    var f = redux(operation, options)
-    if (options.vargs) {
-        f.vargs = Array.isArray(vargs[0]) ? vargs.shift() : []
-    }
-    return f
 }
 
-module.exports = variadic
+exports.vargs = function () {
+    var vargs = []
+    vargs.push.apply(vargs, arguments)
+    vargs.unshift(exports.shift.call(this, vargs))
+    return vargs
+}
