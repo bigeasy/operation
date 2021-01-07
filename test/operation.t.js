@@ -12,6 +12,7 @@ require('proof')(8, async okay => {
 
     const cache = new Operation.Cache(new Magazine)
 
+
     const gathered = []
     const handle = {
         async writev (buffers) {
@@ -33,7 +34,7 @@ require('proof')(8, async okay => {
 
     await Operation.open(filename, 'a', async open => {
         await Operation.writev(open, [ buffer ])
-        await cache.sync({ handle: open.handle })
+        await cache.sync.sync({ handle: open.handle })
     })
 
     const file = await fs.readFile(path.join(__dirname, 'tmp', 'file'), 'utf8')
@@ -100,7 +101,7 @@ require('proof')(8, async okay => {
     okay(cache.magazine.size, 0, 'parent cache cleared')
 
     {
-        const fsync = new Operation.Cache(new Magazine, 'fsync')
+        const fsync = new Operation.Cache(new Magazine, new Operation.Sync('fsync'))
         const cartridge = await fsync.get(path.join(__dirname, 'tmp', 'file'))
         cartridge.release()
         await fsync.shrink(0)

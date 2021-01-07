@@ -8,27 +8,33 @@ class Operation {
         IO_ERROR: 'an i/o error occured'
     })
 
-    static Cache = class extends Magazine.OpenClose {
-        constructor (magazine, flush = 'O_SYNC') {
-            super(magazine)
-            this.flush = flush
-        }
-        subordinate () {
-            return this._subordinate(magazine => new Operation.Cache(magazine, this.flush))
-        }
-        async open (filename) {
-            const flag = this.flush == 'O_SYNC' ? 'as' : 'a'
-            return await Operation.Error.resolve(fs.open(filename, flag), 'IO_ERROR')
-        }
-        async close (handle, filename) {
-            await this.sync({ handle, properties: { filename } })
-            await Operation.Error.resolve(handle.close(), 'IO_ERROR')
+    static Sync = class {
+        constructor (strategy = 'O_SYNC') {
+            this.strategy = strategy
+            this.flag = strategy == 'O_SYNC' ? 'as' : 'a'
         }
 
         async sync ({ handle, properties = {} }) {
-            if (this.flush == 'fsync') {
+            if (this.strategy == 'fsync') {
                 await Operation.Error.resolve(handle.sync(), 'IO_ERROR', properties)
             }
+        }
+    }
+
+    static Cache = class extends Magazine.OpenClose {
+        constructor (magazine, sync = new Operation.Sync) {
+            super(magazine)
+            this.sync = sync
+        }
+        subordinate () {
+            return this._subordinate(magazine => new Operation.Cache(magazine, this.sync))
+        }
+        async open (filename) {
+            return await Operation.Error.resolve(fs.open(filename, this.sync.flag), 'IO_ERROR')
+        }
+        async close (handle, filename) {
+            await this.sync.sync({ handle, properties: { filename } })
+            await Operation.Error.resolve(handle.close(), 'IO_ERROR')
         }
     }
 
