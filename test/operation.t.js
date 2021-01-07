@@ -1,4 +1,4 @@
-require('proof')(8, async okay => {
+require('proof')(6, async okay => {
     const path = require('path')
     const fs = require('fs').promises
 
@@ -32,19 +32,22 @@ require('proof')(8, async okay => {
 
     const filename = path.join(__dirname, 'tmp', 'file')
 
-    await Operation.open(filename, 'a', async open => {
-        await Operation.writev(open, [ buffer ])
-        await cache.sync.sync({ handle: open.handle })
-    })
+    {
+        const open = await Operation.open(filename, 'a')
+        try {
+            await Operation.writev(open, [ buffer ])
+            await cache.sync.sync({ handle: open.handle })
+        } finally {
+            await Operation.close(open)
+        }
+    }
 
     const file = await fs.readFile(path.join(__dirname, 'tmp', 'file'), 'utf8')
     okay(file, String(buffer), 'writev')
 
     gathered.length = 0
-    await Operation.open(filename, 0o444, async open => {
-        await Operation.read(open, Buffer.alloc(16), ({ buffer, position }) => {
-            gathered.push({ buffer: String(buffer), position })
-        })
+    await Operation.read(filename, Buffer.alloc(16), 0o444, Buffer.alloc(16), ({ buffer, position }) => {
+        gathered.push({ buffer: String(buffer), position })
     })
 
     okay(gathered, [
@@ -53,40 +56,14 @@ require('proof')(8, async okay => {
     ], 'sync read')
 
     gathered.length = 0
-    await Operation.open(filename, 0o444, async open => {
-        await Operation.read({ handle: open.handle }, Buffer.alloc(16), ({ buffer, position }) => {
-            gathered.push({ buffer: String(buffer), position })
-        })
-    })
-
-    okay(gathered, [
-        { buffer: 'abcdefghijklmnop', position: 0 },
-        { buffer: 'qrstuvwxyz', position: 16 }
-    ], 'sync read handle only')
-
-    gathered.length = 0
-    await Operation.open(filename, 0o444, async open => {
-        for await (const { buffer, position } of await Operation.reader(open, Buffer.alloc(16))) {
-            gathered.push({ buffer: String(buffer), position })
-        }
-    })
+    for await (const { buffer, position } of await Operation.reader(filename, Buffer.alloc(16))) {
+        gathered.push({ buffer: String(buffer), position })
+    }
 
     okay(gathered, [
         { buffer: 'abcdefghijklmnop', position: 0 },
         { buffer: 'qrstuvwxyz', position: 16 }
     ], 'async read')
-
-    gathered.length = 0
-    await Operation.open(filename, 0o444, async open => {
-        for await (const { buffer, position } of await Operation.reader({ handle: open.handle }, Buffer.alloc(16))) {
-            gathered.push({ buffer: String(buffer), position })
-        }
-    })
-
-    okay(gathered, [
-        { buffer: 'abcdefghijklmnop', position: 0 },
-        { buffer: 'qrstuvwxyz', position: 16 }
-    ], 'async read handle only')
 
     const subordinate = cache.subordinate()
     const cartridge = await cache.get(path.join(__dirname, 'tmp', 'file'))

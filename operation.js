@@ -59,38 +59,52 @@ class Operation {
     static async open (filename, ...vargs) {
         const mode = typeof vargs[0] == 'number' ? vargs.shift() : 438
         const flag = typeof vargs[0] == 'string' ? vargs.shift() : 'r'
-        const f = vargs.shift()
-        const handle = await Operation.Error.resolve(fs.open(filename, flag, mode), 'IO_ERROR', { filename })
+        return {
+            handle: await Operation.Error.resolve(fs.open(filename, flag, mode), 'IO_ERROR', { filename }),
+            properties: { filename, mode, flag }
+        }
+    }
+
+    static async close ({ handle, properties: { filename } }) {
+        await Operation.Error.resolve(handle.close(), 'IO_ERROR', { filename })
+    }
+
+    static async *reader (filename, buffer, ...vargs) {
+        const open = await Operation.open.apply(Operation, [ filename ].concat(vargs))
+        const { handle, properties } = open
         try {
-            await f({ handle, properties: { filename } })
+            let position = 0
+            for (;;) {
+                const { bytesRead } = await Operation.Error.resolve(handle.read(buffer, 0, buffer.length), 'IO_ERROR', properties)
+                if (bytesRead == 0) {
+                    break
+                }
+                const slice = bytesRead < buffer.length ? buffer.slice(0, bytesRead) : buffer
+                yield { buffer: slice, properties, position }
+                position += slice.length
+            }
         } finally {
-            await Operation.Error.resolve(handle.close(filename), 'IO_ERROR', { filename })
+            await Operation.close(open)
         }
     }
 
-    static async *reader ({ handle, properties = {} }, buffer) {
-        let position = 0
-        for (;;) {
-            const { bytesRead } = await Operation.Error.resolve(handle.read(buffer, 0, buffer.length), 'IO_ERROR', properties)
-            if (bytesRead == 0) {
-                break
+    static async read (filename, buffer, ...vargs) {
+        const f = vargs.pop()
+        const open = await Operation.open.apply(Operation, [ filename ].concat(vargs))
+        const { handle, properties } = open
+        try {
+            let position = 0
+            for (;;) {
+                const { bytesRead } = await Operation.Error.resolve(handle.read(buffer, 0, buffer.length), 'IO_ERROR', properties)
+                if (bytesRead == 0) {
+                    break
+                }
+                const slice = bytesRead < buffer.length ? buffer.slice(0, bytesRead) : buffer
+                f({ buffer: slice, properties, position })
+                position += slice.length
             }
-            const slice = bytesRead < buffer.length ? buffer.slice(0, bytesRead) : buffer
-            yield { buffer: slice, properties, position }
-            position += slice.length
-        }
-    }
-
-    static async read ({ handle, properties = {} }, buffer, f) {
-        let position = 0
-        for (;;) {
-            const { bytesRead } = await Operation.Error.resolve(handle.read(buffer, 0, buffer.length), 'IO_ERROR', properties)
-            if (bytesRead == 0) {
-                break
-            }
-            const slice = bytesRead < buffer.length ? buffer.slice(0, bytesRead) : buffer
-            f({ buffer: slice, properties, position })
-            position += slice.length
+        } finally {
+            await Operation.close(open)
         }
     }
 }
