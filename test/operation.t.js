@@ -1,45 +1,108 @@
-require('proof')(10, prove)
+require('proof')(8, async okay => {
+    const path = require('path')
+    const fs = require('fs').promises
 
-function prove (okay) {
-    var operation = require('..')
+    const Magazine = require('magazine')
+    const Operation = require('../operation')
 
-    var f = operation.shift([ function () { return this.value } ])
-    okay(f.call({ value: 1 }), 1, 'function')
+    const buffer = Buffer.from('abcdefghijklmnopqrstuvwxyz')
 
-    var object = { value: 2 }
-    function vargs () {
-        return operation.vargs.apply(object, arguments)
-    }
-    var f = operation.shift([ function () { return this.value } ])
-    var varged = vargs(function () { return this.value }, 1, 2)
-    okay(varged.shift().call({ value: 1 }), 2, 'bound function')
-    okay(varged, [ 1, 2 ], 'vargs')
+    await fs.rmdir(path.join(__dirname, 'tmp'), { recursive: true })
+    await fs.mkdir(path.join(__dirname, 'tmp'), { recursive: true })
 
-    var f = operation.shift([[ function () { return 'array' } ]])
-    okay(f(), 'array', 'object is array')
-    var f = operation.shift([ { value: 'bound function' }, function () { return this.value } ])
-    okay(f(), 'bound function', 'bound function')
-    var f = operation.shift([ { value: 'bound method', method: function () { return this.value } }, 'method' ])
-    okay(f(), 'bound method', 'bound method')
-    try {
-        operation.shift([ {} ])
-    } catch (e) {
-        okay(/expecting function/.test(e.message), 'expecting function')
-    }
-    var f = operation.shift.call({ value: 'implicit method', method: function () { return this.value } }, [ 'method' ])
-    okay(f(), 'implicit method', 'bound method')
-    try {
-        operation.shift([ 'string' ])
-    } catch (e) {
-        okay(/implicit object required/.test(e.message), 'implicit object required')
-    }
-    try {
-        operation.shift([ 1 ])
-    } catch (e) {
-        okay(/unable.*desired/.test(e.message), 'unknown type')
+    const cache = new Operation.Cache(new Magazine)
+
+    const gathered = []
+    const handle = {
+        async writev (buffers) {
+            const slice = Buffer.concat(buffers).slice(0, 17)
+            gathered.push(String(slice))
+            return { bytesWritten: slice.length }
+        }
     }
 
-    return
-var f = operation.vargs.apply(operation, arguments).shift()
-var f = vargs.shift()
-}
+    const split = []
+    for (let i = 0; i < buffer.length; i += 5) {
+        split.push(buffer.slice(i, i + 5))
+    }
+    await Operation.writev({ handle }, split)
+
+    okay(gathered, [ String(buffer.slice(0, 17)), String(buffer.slice(17)) ], 'writev retry')
+
+    const filename = path.join(__dirname, 'tmp', 'file')
+
+    await Operation.open(filename, 'a', async open => {
+        await Operation.writev(open, [ buffer ])
+        await cache.sync({ handle: open.handle })
+    })
+
+    const file = await fs.readFile(path.join(__dirname, 'tmp', 'file'), 'utf8')
+    okay(file, String(buffer), 'writev')
+
+    gathered.length = 0
+    await Operation.open(filename, 0o444, async open => {
+        await Operation.read(open, Buffer.alloc(16), ({ buffer, position }) => {
+            gathered.push({ buffer: String(buffer), position })
+        })
+    })
+
+    okay(gathered, [
+        { buffer: 'abcdefghijklmnop', position: 0 },
+        { buffer: 'qrstuvwxyz', position: 16 }
+    ], 'sync read')
+
+    gathered.length = 0
+    await Operation.open(filename, 0o444, async open => {
+        await Operation.read({ handle: open.handle }, Buffer.alloc(16), ({ buffer, position }) => {
+            gathered.push({ buffer: String(buffer), position })
+        })
+    })
+
+    okay(gathered, [
+        { buffer: 'abcdefghijklmnop', position: 0 },
+        { buffer: 'qrstuvwxyz', position: 16 }
+    ], 'sync read handle only')
+
+    gathered.length = 0
+    await Operation.open(filename, 0o444, async open => {
+        for await (const { buffer, position } of await Operation.reader(open, Buffer.alloc(16))) {
+            gathered.push({ buffer: String(buffer), position })
+        }
+    })
+
+    okay(gathered, [
+        { buffer: 'abcdefghijklmnop', position: 0 },
+        { buffer: 'qrstuvwxyz', position: 16 }
+    ], 'async read')
+
+    gathered.length = 0
+    await Operation.open(filename, 0o444, async open => {
+        for await (const { buffer, position } of await Operation.reader({ handle: open.handle }, Buffer.alloc(16))) {
+            gathered.push({ buffer: String(buffer), position })
+        }
+    })
+
+    okay(gathered, [
+        { buffer: 'abcdefghijklmnop', position: 0 },
+        { buffer: 'qrstuvwxyz', position: 16 }
+    ], 'async read handle only')
+
+    const subordinate = cache.subordinate()
+    const cartridge = await cache.get(path.join(__dirname, 'tmp', 'file'))
+    {
+        const cartridge = await subordinate.get(path.join(__dirname, 'tmp', 'osync'))
+        cartridge.release()
+        await subordinate.shrink(0)
+    }
+    cartridge.release()
+    okay(cache.magazine.size, 1, 'still has parent handle')
+    await cache.shrink(0)
+    okay(cache.magazine.size, 0, 'parent cache cleared')
+
+    {
+        const fsync = new Operation.Cache(new Magazine, 'fsync')
+        const cartridge = await fsync.get(path.join(__dirname, 'tmp', 'file'))
+        cartridge.release()
+        await fsync.shrink(0)
+    }
+})

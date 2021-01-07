@@ -3,7 +3,7 @@
     "version":              "5.0.2",
     "description":
 
-      "Container for user-specified callbacks that allows for operation user-specific context object.",
+      "Handle-based `async`/`await` file operations.",
 
     "keywords":
     [
@@ -20,14 +20,16 @@
     },
     "dependencies":
     {
+                            "interrupt":                    "11.0.0-alpha.16",
+                            "magazine":                     "6.0.0-alpha.5"
     },
     "devDependencies":
     {
-                            "proof":                        "7.0.x"
+                            "proof":                        "^9.0.3"
     },
     "main":                 "operation",
     "scripts":
     {
-                            "test": "proof test test/*.t.js"
+                            "test": "proof test/*.t.js"
     }
 }
