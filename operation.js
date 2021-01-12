@@ -35,11 +35,11 @@ class Operation {
             return this._subordinate(magazine => new Operation.Cache(magazine, this.sync))
         }
         async open (filename) {
-            return await Operation.Error.resolve(fs.open(filename, this.sync.flag), 'IO_ERROR')
+            return await Operation.open(filename, this.sync.flag)
         }
-        async close (handle, filename) {
-            await this.sync.sync({ handle, properties: { filename } })
-            await Operation.Error.resolve(handle.close(), 'IO_ERROR')
+        async close (open) {
+            await this.sync.sync(open)
+            await Operation.close(open)
         }
     }
 
