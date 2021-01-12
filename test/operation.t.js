@@ -1,4 +1,4 @@
-require('proof')(6, async okay => {
+require('proof')(7, async okay => {
     const path = require('path')
     const fs = require('fs').promises
 
@@ -82,5 +82,13 @@ require('proof')(6, async okay => {
         const cartridge = await fsync.get(path.join(__dirname, 'tmp', 'file'))
         cartridge.release()
         await fsync.shrink(0)
+    }
+
+    {
+        const filename = path.join(__dirname, 'tmp', 'file')
+        await fs.unlink(filename)
+        await Operation.appendv(filename, [ buffer ], cache.sync)
+        const file = await fs.readFile(filename, 'utf8')
+        okay(file, String(buffer), 'appendv')
     }
 })
