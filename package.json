@@ -20,7 +20,7 @@
     },
     "dependencies":
     {
-                            "interrupt":                    "11.0.0-alpha.16",
+                            "interrupt":                    "11.0.0-alpha.18",
                             "magazine":                     "6.0.0-alpha.6"
     },
     "devDependencies":
