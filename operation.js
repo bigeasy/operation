@@ -1,4 +1,4 @@
-const { Interrupt } = require('interrupt')
+const Interrupt = require('interrupt')
 const Magazine = require('magazine')
 const fs = require('fs').promises
 
