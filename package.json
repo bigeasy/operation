@@ -1,6 +1,6 @@
 {
     "name":                 "operation",
-    "version":              "6.0.0-alpha.7",
+    "version":              "6.0.0-alpha.8",
     "description":
 
       "Handle-based `async`/`await` file operations.",
