@@ -21,7 +21,7 @@
     "dependencies":
     {
                             "interrupt":                    "11.0.0-alpha.21",
-                            "magazine":                     "6.0.0-alpha.8"
+                            "magazine":                     "6.0.0-alpha.9"
     },
     "devDependencies":
     {
