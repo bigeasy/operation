@@ -7,7 +7,9 @@ require('proof')(7, async okay => {
 
     const buffer = Buffer.from('abcdefghijklmnopqrstuvwxyz')
 
-    await fs.rmdir(path.join(__dirname, 'tmp'), { recursive: true })
+    const { coalesce } = require('extant')
+
+    await coalesce(fs.rm, fs.rmdir).call(fs, path.join(__dirname, 'tmp'), { force: true, recursive: true })
     await fs.mkdir(path.join(__dirname, 'tmp'), { recursive: true })
 
     const cache = new Operation.Cache(new Magazine)
